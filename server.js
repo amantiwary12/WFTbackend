@@ -18,7 +18,7 @@ const app = express();
 // ✅ First CORS configuration (correct)
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://weeding-family-tree.vercel.app/",
+  "https://weeding-family-tree.vercel.app",
 ];
 
 app.use(
