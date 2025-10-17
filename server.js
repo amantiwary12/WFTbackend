@@ -15,9 +15,10 @@ connectDB();
 const app = express();
 
 ////////////////////////////////////////////////////
+// ✅ First CORS configuration (correct)
 const allowedOrigins = [
-  "http://localhost:3000",                        // local dev
-  "https://weeding-family-tree.vercel.app/",      // your Vercel frontend
+  "http://localhost:3000",
+  "https://weeding-family-tree.vercel.app/",
 ];
 
 app.use(
@@ -29,11 +30,17 @@ app.use(
 ////////////////////////////////////////////////////////////
 
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+// app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+
+
+
 ////////////////////////////////////////////////////////////
 app.use(helmet());
 app.use(morgan("dev"));
 ////////////////////////////////////////////////////////////
+
+
+
 app.use(express.json());
 app.use("/api/images", imageRoutes);
 app.use("/api/people", peopleRoutes); // ✅ People routes
