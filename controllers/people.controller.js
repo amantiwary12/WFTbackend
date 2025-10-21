@@ -30,6 +30,11 @@ export const addPerson = async (req, res) => {
       photo: photoUrl,
     });
 
+     // ✅ Emit WebSocket event
+    const io = req.app.get("io");
+    io.emit("personAdded", person);
+
+
     res.status(201).json(person);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -48,6 +53,12 @@ export const deletePerson = async (req, res) => {
     }
 
     await person.deleteOne();
+
+     // ✅ Emit delete event
+    const io = req.app.get("io");
+    io.emit("personDeleted", { id: req.params.id });
+
+    
     res.json({ message: "Person deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });

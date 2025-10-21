@@ -7,6 +7,8 @@ import cors from "cors";
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { autoDeleteOldImages } from "./controllers/image.controller.js";
+import http from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
 connectDB();
@@ -20,11 +22,9 @@ const allowedOrigins = [
   "https://weeding-family-tree.vercel.app",
 ];
 
-// console.log("🔄 CORS configured for origins:", allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // console.log("🌐 Incoming request from origin:", origin);
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
@@ -32,14 +32,7 @@ app.use(cors({
      if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error("CORS policy: Origin not allowed"), false);
     },
-    // if (allowedOrigins.indexOf(origin) === -1) {
-    //   console.log("❌ CORS blocked origin:", origin);
-    //   const msg = 'CORS policy: Origin not allowed';
-    //   return callback(new Error(msg), false);
-    // }
-  //   console.log("✅ CORS allowed origin:", origin);
-  //   return callback(null, true);
-  // },
+ 
 
 
   credentials: true,
@@ -63,10 +56,41 @@ app.get("/api/health", (req, res) => {
 app.use("/api/images", imageRoutes);
 app.use("/api/people", peopleRoutes);
 
+// const PORT = process.env.PORT || 8000;
+// app.listen(PORT, () => {
+//   console.log(`🚀 Server running on port ${PORT}`);
+//   console.log("✅ CORS configured for:", allowedOrigins);
+// });
+
+// ✅ Create HTTP server and integrate Socket.IO
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "DELETE"],
+    credentials: true,
+  },
+});
+
+// ✅ WebSocket connection
+io.on("connection", (socket) => {
+  console.log("🟢 WebSocket connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("🔴 WebSocket disconnected:", socket.id);
+  });
+});
+
+// ✅ Make `io` available in controllers
+app.set("io", io);
+
+// ✅ Start server
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log("✅ CORS configured for:", allowedOrigins);
+  console.log("💬 WebSocket server is live!");
 });
 
 // Auto delete images
