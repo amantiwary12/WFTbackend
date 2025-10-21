@@ -1,14 +1,5 @@
 import mongoose from "mongoose";
 
-// const personSchema = new mongoose.Schema({
-//   name: { type: String, required: true },
-//   relation: { type: String, required: true },
-//   side: { type: String, required: true },
-//   photo: { type: String }, // URL from Cloudinary
-// });
-
-
-
 const personSchema = new mongoose.Schema({
   name: { type: String, required: true },
   photo: String,

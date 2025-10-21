@@ -21,26 +21,15 @@ const allowedOrigins = [
   "https://weeding-family-tree.vercel.app",
 ];
 
-// console.log("🔄 CORS configured for origins:", allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // console.log("🌐 Incoming request from origin:", origin);
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
+
     if (!origin) return callback(null, true);
     
      if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error("CORS policy: Origin not allowed"), false);
     },
-    // if (allowedOrigins.indexOf(origin) === -1) {
-    //   console.log("❌ CORS blocked origin:", origin);
-    //   const msg = 'CORS policy: Origin not allowed';
-    //   return callback(new Error(msg), false);
-    // }
-  //   console.log("✅ CORS allowed origin:", origin);
-  //   return callback(null, true);
-  // },
 
 
   credentials: true,
@@ -71,7 +60,6 @@ app.listen(PORT, () => {
 });
 
 // Auto delete images
-// setInterval(autoDeleteOldImages, 6 * 60 * 60 * 1000);
 if (typeof autoDeleteOldImages === "function") {
   setInterval(autoDeleteOldImages, 6 * 60 * 60 * 1000);
 }
