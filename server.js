@@ -100,8 +100,8 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://wedding-family-tree.vercel.app", // <-- make sure spelling is correct
-  "https://your-vercel-domain-if-different.vercel.app"
+  "https://weeding-family-tree.vercel.app", // <-- make sure spelling is correct
+  // "https://your-vercel-domain-if-different.vercel.app"
 ];
 
 app.use(
