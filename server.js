@@ -325,119 +325,127 @@ import { createWebSocketServer } from "./utils/websocket.js";
 import { createServer } from "http";
 import mongoose from "mongoose";
 
-// ✅ Load environment variables
+//  Load environment variables
 dotenv.config();
 
-// ✅ Connect to MongoDB
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 const server = createServer(app);
 
-// ✅ Simple health check route (fixes 404 issue)
+// Simple health check route (fixes 404 issue)
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "Backend is healthy ✅",
+    message: "Backend is healthy ",
     timestamp: new Date(),
   });
 });
 
 // app.use(cors());
-const allowedOrigins = [
-  "http://localhost:5174",
-  "http://localhost:5173",
-  "http://localhost:3000",
-  process.env.FRONTEND_URL,
-];
+// const allowedOrigins = [
+//   "http://localhost:5174",
+//   "http://localhost:5173",
+//   "http://localhost:3000",
+//   "https://weeding-family-tree.vercel.app",
+// ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, origin); // important
-      } else {
-        console.log("🚫 CORS blocked:", origin);
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+//       if (allowedOrigins.includes(origin)) {
+//         return callback(null, true);
+//       } else {
+//         console.log("CORS blocked:", origin);
+//         return callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
+
+// // ✅ ADD THIS LINE
+// app.options("*", cors());
 
 
-// ✅ Security middleware
+app.use(cors())
+
+
+// Security middleware
 app.use(
   helmet({
     contentSecurityPolicy: false, // Disable CSP for now (can be customized later)
   })
 );
 
-// ✅ Logging
+//  Logging
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
-// ✅ Body parsers
+//  Body parsers
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ API routes
-console.log("🚀 Mounting routes...");
+// API routes
+console.log(" Mounting routes...");
 
 app.use("/api/images", imageRoutes);
-console.log("✅ Image routes mounted");
+console.log("Image routes mounted");
 
 app.use("/api/people", peopleRoutes);
-console.log("✅ People routes mounted");
+console.log("People routes mounted");
 
 app.use("/api/weddings", weddingRoutes);
-console.log("✅ Wedding routes mounted");
+console.log("Wedding routes mounted");
 
 
-// ✅ WebSocket setup
+// WebSocket setup
 const wss = createWebSocketServer(server);
 wss.on("error", (error) => {
-  console.error("❌ WebSocket server error:", error);
+  console.error(" WebSocket server error:", error);
 });
 
-// ✅ MongoDB connection monitoring
+// MongoDB connection monitoring
 mongoose.connection.on("error", (err) => {
-  console.error("❌ MongoDB connection error:", err);
+  console.error(" MongoDB connection error:", err);
 });
 
 mongoose.connection.on("disconnected", () => {
-  console.log("⚠️ MongoDB disconnected");
+  console.log("MongoDB disconnected");
 });
 
-// ✅ Server start
+//   server start
 const PORT = process.env.PORT || 8000;
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`✅ Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(` Server running on port ${PORT}`);
+  console.log(` Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(
-    `✅ Database: ${
+    `Database: ${
       mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"
     }`
   );
   console.log(
-    `✅ Frontend URL: ${
+    `Frontend URL: ${
       process.env.FRONTEND_URL || "http://localhost:5174"
     }`
   );
   console.log(
-    `✅ Backend URL: ${
+    `Backend URL: ${
       process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`
     }`
   );
 });
 app.get("/test-route", (req, res) => {
-  res.json({ message: "✅ Express routes working fine" });
+  res.json({ message: "Express routes working fine" });
 });
 
 
-// ✅ Auto delete old images every 6 hours
+//  Auto delete old images every 6 hours
 if (typeof autoDeleteOldImages === "function") {
   setInterval(autoDeleteOldImages, 6 * 60 * 60 * 1000);
 }
