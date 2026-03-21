@@ -1,3 +1,4 @@
+//image.route.js
 import express from "express";
 import upload from "../middlewares/multer.middleware.js";
 import { uploadImage, deleteImage, getImages } from "../controllers/image.controller.js";
