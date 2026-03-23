@@ -1,5 +1,4 @@
 // weeding.controler.js
-
 import Wedding from "../models/wedding.model.js";
 
 export const createWedding = async (req, res) => {

@@ -1,3 +1,4 @@
+// src/controllers/image.controller.js
 import cloudinary from "../utils/cloudinary.js";
 import Image from "../models/image.model.js";
 import fs from "fs";

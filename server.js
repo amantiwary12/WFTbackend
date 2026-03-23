@@ -310,6 +310,8 @@
 
 
 
+
+
 //server.js
 import express from "express";
 import dotenv from "dotenv";
@@ -320,129 +322,88 @@ import weddingRoutes from "./routes/wedding.route.js";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import { autoDeleteOldImages } from "./controllers/image.controller.js";
 import { createWebSocketServer } from "./utils/websocket.js";
 import { createServer } from "http";
 import mongoose from "mongoose";
 
-//  Load environment variables
+// Load env
 dotenv.config();
 
-// Connect to MongoDB
+// DB
 connectDB();
 
 const app = express();
 const server = createServer(app);
 
-// Simple health check route (fixes 404 issue)
+// ✅ VERY IMPORTANT — CORS FIRST
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://weeding-family-tree.vercel.app",
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      console.log("❌ Blocked by CORS:", origin);
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+}));
+
+app.options("*", cors());
+
+// ✅ SECURITY
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
+
+// ✅ LOGGING
+app.use(morgan("dev"));
+
+// ✅ BODY PARSER
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ DEBUG LOGGER
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.url}`);
+  next();
+});
+
+// ✅ ROOT
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
+// ✅ HEALTH
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "Backend is healthy ",
-    timestamp: new Date(),
+    message: "Backend is healthy",
   });
 });
 
-// app.use(cors());
-const allowedOrigins = [
-  "http://localhost:5174",
-  "*", // 🔥 MUST be exact
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true); // ✅ FIXED
-      } else {
-        console.log(" CORS blocked:", origin);
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-
-// Security middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: false, // Disable CSP for now (can be customized later)
-  })
-);
-
-//  Logging
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
-
-//  Body parsers
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// API routes
-console.log(" Mounting routes...");
-
+// ✅ ROUTES
 app.use("/api/images", imageRoutes);
-console.log("Image routes mounted");
-
 app.use("/api/people", peopleRoutes);
-console.log("People routes mounted");
-
 app.use("/api/weddings", weddingRoutes);
-console.log("Wedding routes mounted");
 
+// ✅ WEBSOCKET
+createWebSocketServer(server);
 
-// WebSocket setup
-const wss = createWebSocketServer(server);
-wss.on("error", (error) => {
-  console.error(" WebSocket server error:", error);
-});
+// ✅ MONGODB LOGS
+mongoose.connection.on("error", console.error);
 
-// MongoDB connection monitoring
-mongoose.connection.on("error", (err) => {
-  console.error(" MongoDB connection error:", err);
-});
-
-mongoose.connection.on("disconnected", () => {
-  console.log("MongoDB disconnected");
-});
-
-//   server start
+// ✅ START SERVER
 const PORT = process.env.PORT || 8000;
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(` Server running on port ${PORT}`);
-  console.log(` Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(
-    `Database: ${
-      mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"
-    }`
-  );
-  console.log(
-    `Frontend URL: ${
-      process.env.FRONTEND_URL || "http://localhost:5174"
-    }`
-  );
-  console.log(
-    `Backend URL: ${
-      process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`
-    }`
-  );
+  console.log(`🚀 Server running on ${PORT}`);
 });
-app.get("/test-route", (req, res) => {
-  res.json({ message: "Express routes working fine" });
-});
-
-
-//  Auto delete old images every 6 hours
-if (typeof autoDeleteOldImages === "function") {
-  setInterval(autoDeleteOldImages, 6 * 60 * 60 * 1000);
-}
-
-
-// app.listen(8000,()=>{
-//   console.log("Server running on por")
-// })
