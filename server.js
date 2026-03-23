@@ -356,7 +356,7 @@ app.use(cors({
   credentials: true,
 }));
 
-app.options("*", cors());
+
 
 // ✅ SECURITY
 app.use(helmet({
