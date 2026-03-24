@@ -347,7 +347,7 @@ app.use(cors({
     if (!origin) return callback(null, true);
 
     const isAllowed = allowedOrigins.some(domain =>
-      origin.includes(domain)
+      allowedOrigins.includes(origin)
     );
 
     if (isAllowed) {
